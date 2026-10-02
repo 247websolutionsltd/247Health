@@ -1,63 +1,41 @@
+import AuthHeader from "@/components/auth-header";
 import Button from "@/components/button";
 import Container from "@/components/custom-container";
 import Input from "@/components/custom-input";
 import { ThemedText } from "@/components/themed-text";
-import { Colors, Spacing } from "@/constants/theme";
+import { Colors, Radius, Shadow, Spacing } from "@/constants/theme";
 import { useAuth } from "@/context/PageContext";
 import { useTheme } from "@/hooks/use-theme";
 import { useStyles } from "@/styles/styles";
 import { router } from "expo-router";
-import { Image, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
-export default function Register(){
-    const styles = useStyles();
-    const theme = useTheme();
-    const {registerForm, updateRegisterField} = useAuth();
-    return(
-        <Container edges={['bottom']} style={{justifyContent:'space-between'}}>
-            <View/>
-            <View style={{padding:Spacing.three}}>
-                <View style={{paddingVertical:Spacing.three}}>
-                    <ThemedText type="large">Create an account</ThemedText>
-                    <ThemedText>Complete the sign up process to get started</ThemedText>
-                </View>
-                <View style={{paddingVertical:Spacing.two}}>
-                    <Input label="Full Name" placeholder="John Doe" onChangeText={(text)=>updateRegisterField("name", text)}/>
-                    <Input label="Phone" placeholder="08012345678" number onChangeText={(text)=>updateRegisterField("phone", text)}/>
-                    <Input label="Email" placeholder="you@example.com" onChangeText={(text)=>updateRegisterField("email", text)}/>
-                    <Input label="Password" placeholder="yourPa$$w0rd" password onChangeText={(text)=>updateRegisterField("password", text)}/>
-                    <Input label="Confirm Password" placeholder="yourPa$$w0rd" password onChangeText={(text)=>updateRegisterField("confirm", text)}/>
-                </View>
-            </View>
+export default function Register() {
+  const styles = useStyles();
+  const theme = useTheme();
+  const { updateRegisterField } = useAuth();
 
-            <View>
-                <Button onPress={()=>router.replace("/(tabs)/home")} title="Sign In" style={{marginHorizontal:Spacing.three}}/>
-                <View style={styles.row}>
-                    <View style={styles.line}/>
-                    <ThemedText style={{padding:Spacing.two, color:theme.textSecondary}}>or continue with</ThemedText>
-                    <View style={styles.line}/>
-                </View>
-                <View style={styles.socialRow}>
-                    <TouchableOpacity style={styles.socialBtn} >
-                        <Image source={require('../../../assets/images/google.png')} style={{width:27, height:27, marginRight:5}}/>
-                        <ThemedText >Google</ThemedText>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialBtn}>
-                        <Image source={require('../../../assets/images/apple.png')} style={{width:23, height:23, marginRight:5}} resizeMode="contain"/>
-                        <ThemedText>Apple</ThemedText>
-                    </TouchableOpacity>
-                </View>
-                <View style={[styles.row, {justifyContent:'center'}]}>
-                    <ThemedText>
-                        Don't have an account?{" "}
-                    </ThemedText>
-                    <TouchableOpacity style={{marginVertical:Spacing.two}} onPress={()=>router.push('/auth/logIn')}>
-                        <ThemedText style={{fontWeight:500, color:Colors.primary}}>
-                            Sign up
-                        </ThemedText>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </Container>
-    )
+  return (
+    <Container edges={[]}>
+      <AuthHeader title="Create account" subtitle="Join CareNest and book care in minutes" />
+
+      <View style={[{ marginHorizontal: Spacing.three, marginTop: -28, backgroundColor: theme.background, borderRadius: Radius.lg, padding: Spacing.three }, Shadow]}>
+        <Input label="Full name" placeholder="Jane Doe" onChangeText={(t) => updateRegisterField("name", t)} />
+        <Input label="Phone" placeholder="08012345678" number onChangeText={(t) => updateRegisterField("phone", t)} />
+        <Input label="Email" placeholder="you@example.com" onChangeText={(t) => updateRegisterField("email", t)} />
+        <Input label="Password" placeholder="Create a password" password onChangeText={(t) => updateRegisterField("password", t)} />
+        <Input label="Confirm password" placeholder="Repeat your password" password onChangeText={(t) => updateRegisterField("confirm", t)} />
+        <View style={{ marginTop: Spacing.two }}>
+          <Button onPress={() => router.replace("/(tabs)/home")} title="Create account" />
+        </View>
+      </View>
+
+      <View style={[styles.row, { justifyContent: "center", marginTop: Spacing.three }]}>
+        <ThemedText type="small" style={{ color: theme.textSecondary }}>Already have an account? </ThemedText>
+        <TouchableOpacity onPress={() => router.push("/auth/logIn")}>
+          <ThemedText type="smallBold" style={{ color: Colors.primary }}>Sign in</ThemedText>
+        </TouchableOpacity>
+      </View>
+    </Container>
+  );
 }

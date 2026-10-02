@@ -17,19 +17,25 @@ export function useStyles() {
 
 const createStyles = (theme:any, width:any, height:any, insets:any)=>StyleSheet.create({
     button: {
-        height:60,
-        borderRadius: Radius.sm,
+        height:56,
+        borderRadius: Radius.pill,
         alignItems: "center",
         justifyContent:'center',
-        backgroundColor:Colors.primary 
+        backgroundColor:Colors.primary,
+        shadowColor: Colors.primary,
+        shadowOpacity: 0.3,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 5,
     },
     button2:{
         borderWidth:1,
         borderColor:theme.line,
         alignItems:'center',
         justifyContent:'center',
-        height:60,
-        borderRadius:16
+        height:56,
+        borderRadius:Radius.pill,
+        backgroundColor:theme.background
     },
     row:{
       flexDirection:'row',
@@ -75,14 +81,13 @@ const createStyles = (theme:any, width:any, height:any, insets:any)=>StyleSheet.
       backgroundColor:Colors.primary
     },
     textInputView:{
-      borderWidth:1,
-      borderColor:theme.line,
-      padding:Spacing.one,
+      paddingVertical:Spacing.one,
+      paddingHorizontal:Spacing.three,
       borderRadius: Radius.sm,
       flexDirection:'row',
-      paddingRight:Spacing.two, 
-      backgroundColor:theme.background,
-      alignItems:'center'
+      backgroundColor:theme.backgroundElement,
+      alignItems:'center',
+      minHeight:52
     },
     authImage:{
       height:height/3,
@@ -108,8 +113,8 @@ const createStyles = (theme:any, width:any, height:any, insets:any)=>StyleSheet.
     },
     socialBtn: {
       flex: 1,
-      height: 46,
-      borderRadius: 12,
+      height: 50,
+      borderRadius: Radius.pill,
       borderWidth: 1,
       borderColor: theme.line,
       backgroundColor: theme.background,
@@ -169,12 +174,12 @@ const createStyles = (theme:any, width:any, height:any, insets:any)=>StyleSheet.
     searchView:{
       flexDirection:'row',
       alignItems:'center',
-      borderWidth:1,
-      borderColor:theme.line,
-      borderRadius:Radius.sm,
-      padding:Spacing.one,
-      paddingHorizontal:Spacing.two,
+      backgroundColor:theme.background,
+      borderRadius:Radius.pill,
+      padding:Spacing.two,
+      paddingHorizontal:Spacing.three,
       flexShrink:1,
+      shadowColor:'#1E40AF', shadowOpacity:0.08, shadowRadius:14, shadowOffset:{width:0,height:5}, elevation:3,
       marginBottom:Spacing.three
     },
     rowWrap:{
@@ -297,7 +302,7 @@ const createStyles = (theme:any, width:any, height:any, insets:any)=>StyleSheet.
         width: 44,
         height: 44,
         borderRadius: 14,
-        backgroundColor: "rgba(120, 160, 131, 0.24)",
+        backgroundColor: "rgba(96, 165, 250, 0.24)",
         alignItems: "center",
         justifyContent: "center",
     },

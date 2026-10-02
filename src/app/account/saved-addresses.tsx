@@ -16,8 +16,8 @@ const addresses = [
     icon: "home",
   },
   {
-    label: "Office",
-    value: "25B Maroko Avenue, Victoria Island, Lagos",
+    label: "Preferred clinic",
+    value: "CityCare Clinic, Victoria Island, Lagos",
     icon: "business",
   },
 ];
@@ -32,7 +32,7 @@ export default function SavedAddresses() {
         <View style={[styles.row, {marginBottom:Spacing.three}]}>
             <Back icon="arrow-back"/>
             <ThemedText type="large" style={{ marginTop: Spacing.three, marginBottom: Spacing.two }}>
-                Saved addresses
+                Saved locations
             </ThemedText>
         </View>
 
@@ -67,7 +67,7 @@ export default function SavedAddresses() {
         </View>
 
         <Button
-          title="Add new address"
+          title="Add new location"
           onPress={() => router.back()}
           type="secondary"
           style={{ marginTop: Spacing.three }}

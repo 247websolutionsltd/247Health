@@ -12,8 +12,8 @@ import { TouchableOpacity, View } from "react-native";
 
 const profileActions = [
     { title: "Edit profile", subtitle: "Update your personal details", icon: "person-outline", route: "/account/edit-profile" as const },
-    { title: "Saved addresses", subtitle: "Manage delivery locations", icon: "location-on", route: "/account/saved-addresses" as const },
-    { title: "Payment methods", subtitle: "Cards and wallet settings", icon: "credit-card", route: "/account/payment-methods" as const },
+    { title: "Saved locations", subtitle: "Home and preferred clinics", icon: "location-on", route: "/account/saved-addresses" as const },
+    { title: "Payment methods", subtitle: "Cards and insurance", icon: "credit-card", route: "/account/payment-methods" as const },
     { title: "Security", subtitle: "Verify sign-in and account access", icon: "shield", route: "/account/security" as const },
     { title: "Privacy policy", subtitle: "Read our privacy terms", icon: "privacy-tip", route: "/account/privacy-policy" as const },
 ] as const;
@@ -46,7 +46,7 @@ export default function Profile() {
                     <View style={[styles.row, { marginBottom: Spacing.three }]}>
                         <Image
                             source={{ uri: owner.profileImage }}
-                            style={{ width: 72, height: 72, borderRadius: 18 }}
+                            style={{ width: 72, height: 72, borderRadius: 24 }}
                         />
                         <View style={{ marginLeft: Spacing.three, flex: 1 }}>
                             <ThemedText type="bold">{owner.name}</ThemedText>
@@ -64,9 +64,9 @@ export default function Profile() {
 
                     <View style={[styles.rowStretch, { alignItems: "stretch" }]}>
                         {[
-                            { label: "Deliveries", value: "148" },
-                            { label: "Success", value: "97%" },
-                            { label: "Payout", value: "$1.2k" },
+                            { label: "Visits", value: "12" },
+                            { label: "Doctors", value: "5" },
+                            { label: "Reports", value: "8" },
                         ].map((item) => (
                             <View
                                 key={item.label}

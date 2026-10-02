@@ -1,44 +1,43 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
 export const Colors = {
-  primary: "#78A083",
-  primaryTint: "#edf5f0",
-  primaryDark: "#223226",
+  primary: "#2563EB",
+  primaryTint: "#EAF2FF",
+  primaryDark: "#0B2A5B",
+  primaryLight: "#60A5FA",
+  success: "#10B981",
+  warning: "#F59E0B",
+  danger: "#EF4444",
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#f0f3f0',
-    backgroundSelected: '#E0E1E6',
-    tint: "#d6e7db",
-    paper: '#f7fbf9',
-    inkSoft: "#565660",
-    line: "#EDEBE7",
-    textSecondary: '#60646C',
-    accentSurface: '#edf5f0',
-    accentText: '#223226',
-    controlOff: '#D9DDE1',
+    text: '#0F1B33',
+    background: '#FFFFFF',
+    backgroundElement: '#EEF3FB',
+    backgroundSelected: '#DCE6F7',
+    tint: "#DCEBFF",
+    paper: '#F4F8FF',
+    inkSoft: "#8A97B0",
+    line: "#E3EAF6",
+    textSecondary: '#5B6B88',
+    accentSurface: '#EAF2FF',
+    accentText: '#1D4ED8',
+    controlOff: '#D5DEEE',
     controlThumb: '#FFFFFF',
   },
   dark: {
-    text: '#ffffff',
-    background: '#101311',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    tint: "#344c3b",
-    paper: '#171b18',
-    inkSoft: "#7e7e85",
-    line: "#3b443e",
-    textSecondary: '#B0B4BA',
-    accentSurface: '#26382d',
-    accentText: '#d6e7db',
-    controlOff: '#4A514C',
+    text: '#F2F6FF',
+    background: '#0E1A30',
+    backgroundElement: '#16253F',
+    backgroundSelected: '#1F3155',
+    tint: "#1E3A6E",
+    paper: '#08111F',
+    inkSoft: "#7D8CAB",
+    line: "#1E2E4D",
+    textSecondary: '#A6B4D0',
+    accentSurface: '#152A4E',
+    accentText: '#93C5FD',
+    controlOff: '#33456A',
     controlThumb: '#FFFFFF',
   },
 } as const;
@@ -46,22 +45,8 @@ export const Colors = {
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
+  ios: { sans: 'system-ui', serif: 'ui-serif', rounded: 'ui-rounded', mono: 'ui-monospace' },
+  default: { sans: 'normal', serif: 'serif', rounded: 'normal', mono: 'monospace' },
   web: {
     sans: 'var(--font-display)',
     serif: 'var(--font-serif)',
@@ -70,21 +55,17 @@ export const Fonts = Platform.select({
   },
 });
 
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
+export const Spacing = { half: 2, one: 4, two: 8, three: 16, four: 24, five: 32, six: 64 } as const;
 
-export const Radius = {
-  sm: 10,
-  md: 16,
-  lg: 24,
-  pill: 999,
+// Softer, rounder shape language than the original
+export const Radius = { sm: 14, md: 20, lg: 28, pill: 999 } as const;
+
+export const Shadow = {
+  shadowColor: '#1E40AF',
+  shadowOpacity: 0.08,
+  shadowRadius: 16,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 3,
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;

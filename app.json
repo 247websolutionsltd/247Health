@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "247Logistics",
-    "slug": "247Logistics",
+    "name": "247Health",
+    "slug": "247Health",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "247logistics",
+    "scheme": "247health",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -16,7 +16,7 @@
         "foregroundImage": "./assets/images/icon.png",
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.logistics247"
+      "package": "com.health247"
     },
     "web": {
       "output": "static",

@@ -123,12 +123,12 @@ export function AuthProvider({
 
   const [ owner, setOwner ] = useState({
       profileImage:"https://images.unsplash.com/photo-1788801246805-284ab3eb2860?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw5fHx8ZW58MHx8fHx8",
-      name:"Ken Nwaeze",
-      title:"Luxry Property Specialist",
+      name:"David Nwaeze",
+      title:"Patient ID: CN-20418",
       phone:"(310) 555-0148",
-      email:"alexandra@estates.com",
+      email:"david@carenest.app",
       balance:"26,000",
-      about:"Specializing in luxury estates across Lagos and the Westside for over a decade."
+      about:"Blood type O+ • No known allergies"
   });
 
   const updateOwnerField = (

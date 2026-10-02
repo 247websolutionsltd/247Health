@@ -9,9 +9,11 @@ export default function RootLayout() {
       <AppThemeProvider initialTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
         <AuthProvider>
           <Stack screenOptions={{headerShown: false}}>
-            {/* <Stack.Screen name="index" /> */}
+            <Stack.Screen name="index" />
             <Stack.Screen name="onboard" />
-            {/* <Stack.Screen name="explore" /> */}
+            <Stack.Screen name="doctors/index" />
+            <Stack.Screen name="doctors/[id]" />
+            <Stack.Screen name="booking-confirmation" options={{ gestureEnabled: false }} />
           </Stack>
         </AuthProvider>
       </AppThemeProvider>

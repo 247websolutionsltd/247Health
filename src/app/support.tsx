@@ -8,7 +8,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 
-const faqs = [{ question: "How do I track a package?", answer: "Open the shipment from your recent activity or use the Track Shipment action." }, { question: "How quickly is a rider assigned?", answer: "Urgent requests usually receive a rider assignment within 12 minutes." }, { question: "Can I change a delivery address?", answer: "Contact support before pickup and our team will help update the route." }];
+const faqs = [{ question: "How do I reschedule an appointment?", answer: "Open the Visits tab, find your upcoming appointment and tap Reschedule." }, { question: "How do video consultations work?", answer: "Choose Video call when booking. You'll get a secure link 10 minutes before your slot." }, { question: "Can I cancel and get a refund?", answer: "Cancel at least 12 hours before your visit for a full refund to your original payment method." }];
 export default function Support() { 
     const theme = useTheme(); 
     const styles = useStyles();
@@ -16,7 +16,7 @@ export default function Support() {
     const contacts = [
         { label: "Call support", detail: "+234 800 247 0000", icon: "phone" }, 
         { label: "Chat with us", detail: "Usually replies in 5 minutes", icon: "chat" }, 
-        { label: "Email support", detail: "help@247logistics.com", icon: "email" }
+        { label: "Email support", detail: "help@carenest.app", icon: "email" }
     ]; 
     return(
          <Container edges={["top"]}>
@@ -28,7 +28,7 @@ export default function Support() {
                     </ThemedText>
                 </View>
                 <ThemedText style={{ color: theme.textSecondary, marginTop: Spacing.one }}>
-                    We’re here to keep every delivery moving.
+                    We’re here to help you get the care you need.
                 </ThemedText>
                 <View style={{ marginTop: Spacing.three }}>
                     {

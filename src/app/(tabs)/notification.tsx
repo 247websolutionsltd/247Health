@@ -10,7 +10,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { FlatList, TouchableOpacity, View } from "react-native";
 
-const filters = ["All", "Orders", "Wallet", "Updates"];
+const filters = ["All", "Visits", "Results", "Reminders"];
 
 export default function Notification() {
     const theme = useTheme();

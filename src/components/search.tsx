@@ -15,7 +15,7 @@ export default function Search({filter, style}:SearchProps){
     return(
         <View style={[styles.searchView, style]}>
             <MaterialIcons name="search" size={20} color={theme.textSecondary}/>
-            <TextInput placeholder="Search orders or services" value={query} onChangeText={setQuery} onSubmitEditing={() => router.push({ pathname: "/search-results", params: { query } } as never)} returnKeyType="search" style={{flex:1, fontSize:15, color: theme.text}} placeholderTextColor={theme.textSecondary}/>
+            <TextInput placeholder="Search doctors or specialties" value={query} onChangeText={setQuery} onSubmitEditing={() => router.push({ pathname: "/doctors", params: { query } } as never)} returnKeyType="search" style={{flex:1, fontSize:15, color: theme.text}} placeholderTextColor={theme.textSecondary}/>
         </View>
     )
 }

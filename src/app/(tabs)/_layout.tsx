@@ -10,8 +10,8 @@ type IconName = keyof typeof Ionicons.glyphMap;
 
 const TAB_META: Record<string, { label: string; icon: IconName; iconActive: IconName }> = {
   home: { label: "Home", icon: "home-outline", iconActive: "home" },
-  wallet: { label: "Wallet", icon: "wallet-outline", iconActive: "wallet" },
-  notification: { label: "Notifications", icon: "notifications-outline", iconActive: "notifications" },
+  appointments: { label: "Visits", icon: "calendar-outline", iconActive: "calendar" },
+  notification: { label: "Alerts", icon: "notifications-outline", iconActive: "notifications" },
   profile: { label: "Profile", icon: "person-outline", iconActive: "person" },
 };
 interface TabBarRoute {
@@ -26,8 +26,8 @@ interface TabBarProps {
 
 const Send = ()=>{
   return(
-    <TouchableOpacity style={styles.send} onPress={() => router.navigate('/(tabs)/send-package' as const)}>
-      <MaterialIcons name="send" size={30} color={"#FFF"} style={{left:4}}/>
+    <TouchableOpacity style={styles.send} onPress={() => router.navigate('/(tabs)/book' as const)}>
+      <MaterialIcons name="add" size={32} color={"#FFF"}/>
     </TouchableOpacity>
   )
 }
@@ -72,8 +72,8 @@ export default function TabsLayout() {
   return (
     <Tabs tabBar={(props) => <CustomTabBar {...props} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="wallet" options={{ title: "Wallet" }} />
-      <Tabs.Screen name="send-package" options={{ href: null, title: "Send package" }} />
+      <Tabs.Screen name="appointments" options={{ title: "Appointments" }} />
+      <Tabs.Screen name="book" options={{ href: null, title: "Book appointment" }} />
       <Tabs.Screen name="notification" options={{ title: "Notification" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
     </Tabs>
@@ -85,7 +85,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-evenly",
-    borderTopWidth: 1,
+    borderTopWidth: 0,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    shadowColor: "#1E40AF",
+    shadowOpacity: 0.1,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -6 },
     ...(Platform.OS === "android" ? { elevation: 8 } : {}),
   },
   tab: {
@@ -117,9 +123,13 @@ const styles = StyleSheet.create({
     height:60,
     alignItems:'center',
     justifyContent:'center',
-    borderRadius:200,
+    borderRadius:22,
     backgroundColor:Colors.primary,
-    bottom:15,
-    transform: [{ rotate: '-45deg' }], 
+    bottom:18,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   }
 });

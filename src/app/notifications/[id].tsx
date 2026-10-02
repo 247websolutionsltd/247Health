@@ -13,7 +13,7 @@ export default function NotificationDetail() {
   const theme = useTheme();
   const { id = "0" } = useLocalSearchParams<{ id?: string }>();
   const notification = notifications[Number(id)] ?? notifications[0];
-  const hasOrderAction = notification.title.toLowerCase().includes("track");
+  const hasOrderAction = notification.title.toLowerCase().includes("appointment");
   return( 
     <Container edges={["top"]}>
       <View style={{ padding: Spacing.three }}>
@@ -26,7 +26,7 @@ export default function NotificationDetail() {
             {notification.title}
           </ThemedText>
           <ThemedText style={{ color: theme.textSecondary, textAlign: "center", marginTop: Spacing.two, lineHeight: 22 }}>
-            {notification.desc} We’ll keep you updated as your logistics experience moves forward.
+            {notification.desc} We’ll keep you updated as your care journey moves forward.
           </ThemedText>
         </View>
         <View style={{ marginTop: Spacing.four, backgroundColor: theme.accentSurface, borderRadius: 18, padding: Spacing.three }}>
@@ -34,12 +34,12 @@ export default function NotificationDetail() {
             Notification details
           </ThemedText>
           <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: Spacing.two, lineHeight: 22 }}>
-            This notification was sent today to keep your account and delivery activity up to date.
+            This notification was sent today to keep your account and appointment activity up to date.
           </ThemedText>
         </View>
         {
           hasOrderAction && 
-          <Button title="View order" onPress={() => router.push("/order/LT-0421" as never)} style={{ marginTop: Spacing.three }} />
+          <Button title="View appointment" onPress={() => router.push("/(tabs)/appointments" as never)} style={{ marginTop: Spacing.three }} />
         }
       </View>
     </Container>

@@ -21,10 +21,10 @@ export default function Refer() {
                 </ThemedText>
             </View>
             <ThemedText style={{ color: theme.textSecondary, marginTop: Spacing.one }}>
-                Invite a friend and both of you get delivery credit.
+                Invite a friend and you both get a free consultation credit.
             </ThemedText>
             <View style={{ marginTop: Spacing.three, backgroundColor: Colors.primaryDark, borderRadius: 22, padding: Spacing.three }}>
-                <ThemedText type="small" style={{ color: "#dfeee1" }}>Your referral code</ThemedText>
+                <ThemedText type="small" style={{ color: "#DCEBFF" }}>Your referral code</ThemedText>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: Spacing.two }}>
                     <ThemedText type="title" style={{ color: "#FFF", letterSpacing: 2 }}>DAVID24</ThemedText>
                     <TouchableOpacity>

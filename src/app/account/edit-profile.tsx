@@ -45,7 +45,7 @@ export default function EditProfile() {
         <View style={{ marginTop: Spacing.three, backgroundColor: theme.accentSurface, borderRadius: 18, padding: Spacing.three }}>
           <ThemedText type="smallBold" style={{ color: theme.accentText }}>Summary</ThemedText>
           <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: Spacing.one, lineHeight: 20 }}>
-            Keep your account details accurate so drivers and support teams can verify shipments and delivery instructions quickly.
+            Keep your details accurate so doctors and clinic staff can verify your identity and reach you about your appointments.
           </ThemedText>
         </View>
 

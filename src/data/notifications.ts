@@ -1,38 +1,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { ComponentProps } from "react";
 
-interface NotificationProps{
-    icon: ComponentProps<typeof MaterialIcons>['name'];
-    title: string;
-    desc: string;
+interface NotificationProps {
+  icon: ComponentProps<typeof MaterialIcons>['name'];
+  title: string;
+  desc: string;
 }
 
-const notifications:NotificationProps[] = [
-    {
-        title: '30% Special Discount!',
-        desc: 'Special promotion only valid today.',
-        icon: 'label-outline'
-    },
-    {
-        title: 'Top Up E-wallet Successfully!',
-        desc: 'You have top up your e-wallet.',
-        icon: 'account-balance-wallet'
-    },
-    {
-        title: 'New Service Available!',
-        desc: 'Now you can track order in real-time.',
-        icon: 'location-on'
-    },
-    {
-        title: 'Credit Card Connected!',
-        desc: 'Credit card has been linked.',
-        icon: 'credit-card'
-    },
-    {
-        title: 'Account Setup Successfully!',
-        desc: 'Your account has been created.',
-        icon: 'account-circle'
-    },
-]
+const notifications: NotificationProps[] = [
+  { title: 'Appointment confirmed', desc: 'Dr. Amara Okafor • Fri, 3 Oct at 10:00 AM', icon: 'event-available' },
+  { title: 'Reminder: video consult', desc: 'Your call with Dr. Zainab Bello starts in 1 day.', icon: 'videocam' },
+  { title: 'Lab results ready', desc: 'Your blood test results are now available.', icon: 'science' },
+  { title: 'Prescription refilled', desc: 'Your prescription has been sent to your pharmacy.', icon: 'medication' },
+  { title: 'Profile completed', desc: 'Your health profile is all set up.', icon: 'account-circle' },
+];
 
-export default notifications
+export default notifications;
