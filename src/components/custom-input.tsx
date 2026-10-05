@@ -13,7 +13,7 @@ interface InputProps extends TextInputProps{
     number?: boolean;
     desc?: boolean;
 }
-export default function Input({label, placeholder="", password, onChangeText, number=false, value, desc}:InputProps){
+export default function Input({label, placeholder="", password, onChangeText, number=false, value, desc, ...inputProps}:InputProps){
     const styles = useStyles();
     const theme = useTheme();
     const [ showPassword, setPassword ] = useState(false);
@@ -22,13 +22,14 @@ export default function Input({label, placeholder="", password, onChangeText, nu
             <ThemedText style={{marginBottom:Spacing.one}}>{label}</ThemedText>
             <View style={[styles.textInputView, {minHeight:desc?100:'auto', maxHeight:300 }]}>
                 <TextInput
+                 {...inputProps}
                  placeholder={placeholder} 
                  style={{flex:1, color:theme.text, verticalAlign:'top',}} 
                  secureTextEntry={ (password===true && !showPassword)}
                  onChangeText={onChangeText}
-                 keyboardType={number?"numeric":"default"}
+                 keyboardType={number?"numeric":inputProps.keyboardType ?? "default"}
                  value={value}
-                 multiline={desc}
+                 multiline={desc || inputProps.multiline}
                  placeholderTextColor={theme.textSecondary}
                 />
                 {

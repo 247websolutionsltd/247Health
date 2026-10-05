@@ -1,5 +1,6 @@
 import Button from "@/components/button";
 import Container from "@/components/custom-container";
+import { Avatar } from "@/components/doctor-card";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
 import { useAppTheme, useAuth } from "@/context/PageContext";
@@ -8,6 +9,7 @@ import { useStyles } from "@/styles/styles";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 
 const profileActions = [
@@ -22,14 +24,21 @@ export default function Profile() {
     const styles = useStyles();
     const theme = useTheme();
     const { themeMode, setThemeMode } = useAppTheme();
-    const { owner } = useAuth();
+    const { owner, signOut, loading, error: authError, clearError } = useAuth();
+    const [feedback, setFeedback] = useState<string | null>(null);
+    const handleSignOut = async () => {
+        clearError();
+        const error = await signOut();
+        if (error) setFeedback(error);
+        else router.replace("/auth/logIn");
+    };
 
     return (
         <Container edges={["top"]}>
             <View style={{ padding: Spacing.three }}>
                 <View style={[styles.rowStretch, { marginBottom: Spacing.three }]}>
                     <ThemedText type="large">Profile</ThemedText>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => router.push("/account/edit-profile")}>
                         <ThemedText type="small" style={{ color: theme.accentText }}>Edit</ThemedText>
                     </TouchableOpacity>
                 </View>
@@ -44,10 +53,9 @@ export default function Profile() {
                     }}
                 >
                     <View style={[styles.row, { marginBottom: Spacing.three }]}>
-                        <Image
-                            source={{ uri: owner.profileImage }}
-                            style={{ width: 72, height: 72, borderRadius: 24 }}
-                        />
+                        {owner.profileImage
+                            ? <Image source={{ uri: owner.profileImage }} style={{ width: 72, height: 72, borderRadius: 24 }} />
+                            : <Avatar name={owner.name} color={Colors.primary} size={72} />}
                         <View style={{ marginLeft: Spacing.three, flex: 1 }}>
                             <ThemedText type="bold">{owner.name}</ThemedText>
                             <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: 2 }}>
@@ -64,9 +72,8 @@ export default function Profile() {
 
                     <View style={[styles.rowStretch, { alignItems: "stretch" }]}>
                         {[
-                            { label: "Visits", value: "12" },
-                            { label: "Doctors", value: "5" },
-                            { label: "Reports", value: "8" },
+                            { label: "Blood type", value: owner.bloodType ?? "Not provided" },
+                            { label: "Allergies", value: owner.allergies ?? "Not provided" },
                         ].map((item) => (
                             <View
                                 key={item.label}
@@ -80,7 +87,7 @@ export default function Profile() {
                                 }}
                             >
                                 <ThemedText type="small" style={{ color: theme.accentText }}>{item.label}</ThemedText>
-                                <ThemedText type="bold" style={{ marginTop: Spacing.half, color: theme.accentText }}>
+                                <ThemedText type="smallBold" style={{ marginTop: Spacing.half, color: theme.accentText, textAlign: "center" }} numberOfLines={2}>
                                     {item.value}
                                 </ThemedText>
                             </View>
@@ -192,9 +199,11 @@ export default function Profile() {
                 </View>
             </View>
 
+            {(feedback || authError) && <ThemedText type="small" style={{ color: Colors.danger, marginHorizontal: Spacing.three }}>{feedback || authError}</ThemedText>}
             <Button
                 title="Sign Out"
-                onPress={() => router.replace("/auth/logIn")}
+                onPress={handleSignOut}
+                disabled={loading}
                 type="secondary"
                 style={{ margin: Spacing.three }}
                 textColor={"#D65C5C"}

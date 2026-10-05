@@ -1,11 +1,10 @@
 import Container from "@/components/custom-container";
-import DoctorCard from "@/components/doctor-card";
+import DoctorCard, { Avatar } from "@/components/doctor-card";
 import NextAppointment from "@/components/next-appointment";
 import Search from "@/components/search";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Radius, Shadow, Spacing } from "@/constants/theme";
 import { useAuth } from "@/context/PageContext";
-import { appointments } from "@/data/appointments";
 import { doctors, specialties } from "@/data/doctors";
 import { quickActions } from "@/data/homeCardData";
 import { useTheme } from "@/hooks/use-theme";
@@ -19,8 +18,6 @@ export default function Home() {
   const styles = useStyles();
   const theme = useTheme();
   const { owner } = useAuth();
-  const next = appointments.find((a) => a.status === "upcoming")!;
-  const nextDoc = doctors.find((d) => d.id === next.doctorId)!;
   const firstName = owner.name.split(" ")[0];
 
   return (
@@ -40,8 +37,9 @@ export default function Home() {
             <View style={{ position: "absolute", top: 11, right: 12, width: 9, height: 9, borderRadius: 5, backgroundColor: Colors.danger, borderWidth: 2, borderColor: theme.background }} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/(tabs)/profile")}> 
-            {/* <Avatar name="David Nwaeze" color={Colors.primary} size={46} /> */}
-            <Image source={{uri:owner.profileImage}} style={{width:46, height:46, borderRadius:Radius.sm}}/>
+            {owner.profileImage
+              ? <Image source={{ uri: owner.profileImage }} style={{ width: 46, height: 46, borderRadius: Radius.sm }} />
+              : <Avatar name={owner.name} color={Colors.primary} size={46} />}
           </TouchableOpacity>
         </View>
       </View>

@@ -8,25 +8,54 @@ import { useAuth } from "@/context/PageContext";
 import { useTheme } from "@/hooks/use-theme";
 import { useStyles } from "@/styles/styles";
 import { router } from "expo-router";
+import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 
 export default function Register() {
   const styles = useStyles();
   const theme = useTheme();
-  const { updateRegisterField } = useAuth();
+  const { registerForm, updateRegisterField, signUp, loading, error: authError, clearError } = useAuth();
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedbackIsError, setFeedbackIsError] = useState(true);
+
+  const handleRegister = async () => {
+    clearError();
+    setFeedback(null);
+    if (registerForm.password !== registerForm.confirm) {
+      setFeedback("Passwords do not match.");
+      setFeedbackIsError(true);
+      return;
+    }
+    if (!registerForm.name.trim() || !registerForm.phone.trim() || !registerForm.email.trim() || !registerForm.password) {
+      setFeedback("Enter your name, phone, email, and password to continue.");
+      setFeedbackIsError(true);
+      return;
+    }
+    const result = await signUp(registerForm);
+    if (result.error) {
+      setFeedback(result.error);
+      setFeedbackIsError(true);
+    } else if (result.session) {
+      router.replace("/");
+    } else {
+      setFeedback("Account created. Check your email to confirm your address, then sign in.");
+      setFeedbackIsError(false);
+    }
+  };
 
   return (
     <Container edges={[]}>
       <AuthHeader title="Create account" subtitle="Join CareNest and book care in minutes" />
 
       <View style={[{ marginHorizontal: Spacing.three, marginTop: -28, backgroundColor: theme.background, borderRadius: Radius.lg, padding: Spacing.three }, Shadow]}>
-        <Input label="Full name" placeholder="Jane Doe" onChangeText={(t) => updateRegisterField("name", t)} />
-        <Input label="Phone" placeholder="08012345678" number onChangeText={(t) => updateRegisterField("phone", t)} />
-        <Input label="Email" placeholder="you@example.com" onChangeText={(t) => updateRegisterField("email", t)} />
-        <Input label="Password" placeholder="Create a password" password onChangeText={(t) => updateRegisterField("password", t)} />
-        <Input label="Confirm password" placeholder="Repeat your password" password onChangeText={(t) => updateRegisterField("confirm", t)} />
+        <Input label="Full name" placeholder="Jane Doe" value={registerForm.name} autoComplete="name" textContentType="name" onChangeText={(t) => updateRegisterField("name", t)} />
+        <Input label="Phone" placeholder="08012345678" number value={registerForm.phone} autoComplete="tel" textContentType="telephoneNumber" onChangeText={(t) => updateRegisterField("phone", t)} />
+        <Input label="Email" placeholder="you@example.com" value={registerForm.email} autoCapitalize="none" autoCorrect={false} autoComplete="email" textContentType="emailAddress" keyboardType="email-address" onChangeText={(t) => updateRegisterField("email", t)} />
+        <Input label="Password" placeholder="Create a password" password value={registerForm.password} autoComplete="new-password" textContentType="newPassword" onChangeText={(t) => updateRegisterField("password", t)} />
+        <Input label="Confirm password" placeholder="Repeat your password" password value={registerForm.confirm} autoComplete="new-password" textContentType="newPassword" onChangeText={(t) => updateRegisterField("confirm", t)} />
+        {(feedback || authError) && <ThemedText type="small" style={{ color: feedbackIsError ? Colors.danger : Colors.success, marginBottom: Spacing.two }}>{feedback || authError}</ThemedText>}
         <View style={{ marginTop: Spacing.two }}>
-          <Button onPress={() => router.replace("/(tabs)/home")} title="Create account" />
+          <Button onPress={handleRegister} title="Create account" disabled={loading} />
         </View>
       </View>
 

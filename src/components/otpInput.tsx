@@ -10,8 +10,8 @@ import {
 } from "react-native";
 
 const OTP_LENGTH = 6;
-const { width, height } = Dimensions.get("window");
-export default function OTPInput() {
+const { width } = Dimensions.get("window");
+export default function OTPInput({ onChangeText }: { onChangeText?: (value: string) => void }) {
     const styles = useStyles();
   const [otp, setOtp] = useState<string[]>(
     Array(OTP_LENGTH).fill("")
@@ -36,6 +36,7 @@ export default function OTPInput() {
       newOtp[index] = "";
 
       setOtp(newOtp);
+      onChangeText?.(newOtp.join(""));
 
       return;
     }
@@ -52,6 +53,7 @@ export default function OTPInput() {
         });
 
       setOtp(newOtp);
+      onChangeText?.(newOtp.join(""));
 
       const nextIndex = Math.min(
         index + value.length,
@@ -69,6 +71,7 @@ export default function OTPInput() {
     newOtp[index] = value;
 
     setOtp(newOtp);
+    onChangeText?.(newOtp.join(""));
 
     // Move to next box
     if (index < OTP_LENGTH - 1) {
@@ -92,6 +95,7 @@ export default function OTPInput() {
       newOtp[index - 1] = "";
 
       setOtp(newOtp);
+      onChangeText?.(newOtp.join(""));
 
       inputRefs.current[index - 1]?.focus();
     }
