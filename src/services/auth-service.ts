@@ -1,6 +1,6 @@
 import { getSupabaseClient } from "@/lib/supabase";
 import type { AuthError, Session } from "@supabase/supabase-js";
-import { makeRedirectUri } from "expo-auth-session";
+import * as AuthSession from "expo-auth-session";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
@@ -13,11 +13,7 @@ let googleOAuthInProgress = false;
 const codeExchanges = new Map<string, Promise<Session>>();
 
 export function getGoogleRedirectUri() {
-  const redirectUri = makeRedirectUri({ path: "auth/callback" });
-  if (Platform.OS !== "web" && !redirectUri.startsWith("exp://") && !redirectUri.startsWith("247health://")) {
-    throw new Error(`Expo returned an unsupported OAuth redirect URI: ${redirectUri}`);
-  }
-  return redirectUri;
+  return AuthSession.makeRedirectUri({ path: "auth/callback" });
 }
 
 export async function completeGoogleOAuth(url: string): Promise<Session> {
@@ -58,13 +54,13 @@ export const authService = {
     googleOAuthInProgress = true;
 
     try {
-      const redirectTo = getGoogleRedirectUri();
-      console.info(`[Google OAuth] Expo redirect URI: ${redirectTo}`);
+      const redirectUri = getGoogleRedirectUri();
+      console.info(`[Google OAuth] Supabase OAuth redirect URI: ${redirectUri}`);
       const { data, error } = await getSupabaseClient().auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo,
-          skipBrowserRedirect: true,
+          redirectTo: redirectUri,
+          skipBrowserRedirect: false,
           queryParams: { prompt: "select_account" },
         },
       });
@@ -73,13 +69,13 @@ export const authService = {
 
       const authorizationUrl = new URL(data.url);
       const configuredRedirect = authorizationUrl.searchParams.get("redirect_to");
-      if (configuredRedirect !== redirectTo) {
+      if (configuredRedirect !== redirectUri) {
         throw new Error(
-          `Supabase is not allowing the app callback ${redirectTo}. Add this exact URI to Auth > URL Configuration > Redirect URLs; Google sign-in was stopped to prevent a localhost redirect.`,
+          `Supabase is not allowing the app callback ${redirectUri}. Add this exact URI to Auth > URL Configuration > Redirect URLs; Google sign-in was stopped because the callback does not match.`,
         );
       }
 
-      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUri);
       if (result.type === "cancel" || result.type === "dismiss") return { type: "cancelled" };
       if (result.type !== "success") throw new Error("Google sign-in did not complete.");
 

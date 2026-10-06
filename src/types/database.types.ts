@@ -31,7 +31,10 @@ export type Database = {
         Row: { id: string; patient_id: string; slot_id: string; consultation_type: Database["public"]["Enums"]["consultation_type"]; reason_for_visit: string | null; status: Database["public"]["Enums"]["appointment_status"]; created_at: string; updated_at: string };
         Insert: { id?: string; patient_id: string; slot_id: string; consultation_type: Database["public"]["Enums"]["consultation_type"]; reason_for_visit?: string | null; status?: Database["public"]["Enums"]["appointment_status"]; created_at?: string; updated_at?: string };
         Update: { id?: string; patient_id?: string; slot_id?: string; consultation_type?: Database["public"]["Enums"]["consultation_type"]; reason_for_visit?: string | null; status?: Database["public"]["Enums"]["appointment_status"]; created_at?: string; updated_at?: string };
-        Relationships: [{ foreignKeyName: "appointments_slot_id_fkey"; columns: ["slot_id"]; isOneToOne: false; referencedRelation: "doctor_slots"; referencedColumns: ["id"] }];
+        Relationships: [
+          { foreignKeyName: "appointments_patient_id_fkey"; columns: ["patient_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "appointments_slot_id_fkey"; columns: ["slot_id"]; isOneToOne: false; referencedRelation: "doctor_slots"; referencedColumns: ["id"] }
+        ];
       };
     };
     Views: Record<string, never>;
