@@ -1,12 +1,11 @@
 import { Colors, Radius, Spacing } from "@/constants/theme";
 import { useAppTheme } from "@/context/PageContext";
-import { Dimensions, StyleSheet, useColorScheme } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // export type ThemeType = typeof Colors.light;
 export function useStyles() {
-  const { themeMode, setThemeMode } = useAppTheme();
-  const colorScheme = useColorScheme() ?? 'light';
+  const { themeMode } = useAppTheme();
   const theme = themeMode === "dark" ? Colors.dark : Colors.light
   const {width, height} = Dimensions.get('window');
   const insets = useSafeAreaInsets();

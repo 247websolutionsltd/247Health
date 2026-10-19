@@ -14,7 +14,7 @@ import { TouchableOpacity, View } from "react-native";
 export default function Register() {
   const styles = useStyles();
   const theme = useTheme();
-  const { registerForm, updateRegisterField, signUp, loading, error: authError, clearError } = useAuth();
+  const { registerForm, updateRegisterField, handleSignup, loading, error: authError, clearError } = useAuth();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackIsError, setFeedbackIsError] = useState(true);
 
@@ -31,16 +31,12 @@ export default function Register() {
       setFeedbackIsError(true);
       return;
     }
-    const result = await signUp(registerForm);
-    if (result.error) {
-      setFeedback(result.error);
+    if (registerForm.password.length < 8) {
+      setFeedback("Choose a password with at least 8 characters.");
       setFeedbackIsError(true);
-    } else if (result.session) {
-      router.replace("/");
-    } else {
-      setFeedback("Account created. Check your email to confirm your address, then sign in.");
-      setFeedbackIsError(false);
+      return;
     }
+    await handleSignup();
   };
 
   return (

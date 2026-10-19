@@ -14,9 +14,8 @@ import { TouchableOpacity, View } from "react-native";
 
 const profileActions = [
     { title: "Edit profile", subtitle: "Update your personal details", icon: "person-outline", route: "/account/edit-profile" as const },
-    { title: "Saved locations", subtitle: "Home and preferred clinics", icon: "location-on", route: "/account/saved-addresses" as const },
-    { title: "Payment methods", subtitle: "Cards and insurance", icon: "credit-card", route: "/account/payment-methods" as const },
-    { title: "Security", subtitle: "Verify sign-in and account access", icon: "shield", route: "/account/security" as const },
+    { title: "Security", subtitle: "Password and email verification", icon: "shield", route: "/account/security" as const },
+    { title: "Help & support", subtitle: "Contact us and read the FAQs", icon: "support-agent", route: "/support" as const },
     { title: "Privacy policy", subtitle: "Read our privacy terms", icon: "privacy-tip", route: "/account/privacy-policy" as const },
 ] as const;
 
@@ -24,7 +23,7 @@ export default function Profile() {
     const styles = useStyles();
     const theme = useTheme();
     const { themeMode, setThemeMode } = useAppTheme();
-    const { owner, signOut, loading, error: authError, clearError } = useAuth();
+    const { owner, user, signOut, loading, error: authError, clearError } = useAuth();
     const [feedback, setFeedback] = useState<string | null>(null);
     const handleSignOut = async () => {
         clearError();
@@ -62,9 +61,9 @@ export default function Profile() {
                                 {owner.title}
                             </ThemedText>
                             <View style={{ flexDirection: "row", alignItems: "center", marginTop: Spacing.one }}>
-                                <MaterialIcons name="verified" size={14} color={Colors.primary} />
-                                <ThemedText type="small" style={{ color: theme.accentText, marginLeft: Spacing.one }}>
-                                    Verified account
+                                <MaterialIcons name={user?.emailVerified ? "verified" : "mark-email-unread"} size={14} color={user?.emailVerified ? Colors.primary : Colors.warning} />
+                                <ThemedText type="small" style={{ color: user?.emailVerified ? theme.accentText : theme.textSecondary, marginLeft: Spacing.one }}>
+                                    {user?.emailVerified ? "Email verified" : "Email not verified"}
                                 </ThemedText>
                             </View>
                         </View>

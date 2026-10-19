@@ -1,0 +1,202 @@
+rules_version = '2';
+
+// CareNest Firestore rules.
+//
+//  users/{uid}                       patient profile        owner read/write (validated)
+//  users/{uid}/notifications/{id}    in-app notifications   owner read/create/update(read flag)/delete
+//  specialties, doctors              catalogue              signed-in read, no client writes (seed with Admin SDK)
+//  doctors/{id}/slots/{slotId}       bookable time slots    signed-in read; a client may ONLY flip a slot as part
+//                                                           of booking/cancelling its own appointment
+//  appointments/{id}                 bookings               patient reads own; create only with a matching slot
+//                                                           reservation in the same commit; may only cancel
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isStr(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    function optStr(d, field, max) {
+      return !(field in d) || d[field] == null || isStr(d[field], max);
+    }
+
+    function apptPath(id) {
+      return /databases/$(database)/documents/appointments/$(id);
+    }
+
+    // A slot may flip free -> taken only if the appointment that claims it is created in the same commit,
+    // belongs to the caller, and points back at this exact slot.
+    function isSlotBooking(doctorId, slotId) {
+      let aid = request.resource.data.appointment_id;
+      let booked = getAfter(apptPath(aid)).data;
+      return resource.data.is_available == true
+        && request.resource.data.is_available == false
+        && resource.data.starts_at > request.time
+        && aid is string
+        && existsAfter(apptPath(aid))
+        && booked.slot_id == slotId
+        && booked.doctor_id == doctorId
+        && booked.patient_id == request.auth.uid
+        && booked.status == 'confirmed';
+    }
+
+    // A slot may flip taken -> free only for the patient who owns its appointment, which is being cancelled
+    // in the same commit.
+    function isSlotRelease() {
+      let aid = resource.data.appointment_id;
+      return resource.data.is_available == false
+        && request.resource.data.is_available == true
+        && request.resource.data.appointment_id == null
+        && aid is string
+        && get(apptPath(aid)).data.patient_id == request.auth.uid
+        && getAfter(apptPath(aid)).data.status == 'cancelled';
+    }
+
+    // ---------- Patient profile ----------
+    function validProfile(uid, d) {
+      return d.keys().hasOnly(['full_name', 'phone', 'blood_type', 'allergies', 'avatar_path',
+                               'patient_details_completed_at', 'created_at', 'updated_at'])
+        && d.keys().hasAll(['created_at', 'updated_at', 'patient_details_completed_at'])
+        && optStr(d, 'full_name', 120)
+        && optStr(d, 'phone', 32)
+        && optStr(d, 'allergies', 2000)
+        && (!('blood_type' in d) || d.blood_type == null
+            || d.blood_type in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'])
+        && (!('avatar_path' in d) || d.avatar_path == null
+            || d.avatar_path == 'profile-photos/' + uid + '/avatar')
+        && (d.patient_details_completed_at == null || d.patient_details_completed_at is timestamp)
+        && d.updated_at == request.time;
+    }
+
+    match /users/{uid} {
+      allow read: if isUser(uid);
+      allow create: if isUser(uid)
+        && validProfile(uid, request.resource.data)
+        && request.resource.data.created_at == request.time
+        && request.resource.data.patient_details_completed_at == null;
+      allow update: if isUser(uid)
+        && validProfile(uid, request.resource.data)
+        && request.resource.data.created_at == resource.data.created_at;
+      allow delete: if false;
+
+      match /notifications/{nid} {
+        allow read: if isUser(uid);
+        allow create: if isUser(uid)
+          && request.resource.data.keys().hasOnly(['type', 'title', 'body', 'icon', 'appointment_id', 'read', 'created_at'])
+          && request.resource.data.keys().hasAll(['type', 'title', 'body', 'icon', 'read', 'created_at'])
+          && request.resource.data.type in ['appointment', 'account']
+          && isStr(request.resource.data.title, 200)
+          && isStr(request.resource.data.body, 500)
+          && request.resource.data.read == false
+          && request.resource.data.created_at == request.time;
+        // The only thing a patient can change on a notification is whether it has been read.
+        allow update: if isUser(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+          && request.resource.data.read is bool;
+        allow delete: if isUser(uid);
+      }
+    }
+
+    // ---------- Canonical owner account ----------
+    function validOwner(uid, d) {
+      return d.keys().hasOnly(['uid', 'email', 'displayName', 'phone', 'photoURL',
+                               'bloodType', 'allergies', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['uid', 'email', 'displayName', 'phone', 'photoURL',
+                            'bloodType', 'allergies', 'createdAt', 'updatedAt'])
+        && d.uid == uid
+        && optStr(d, 'email', 320)
+        && isStr(d.displayName, 120)
+        && optStr(d, 'phone', 32)
+        && optStr(d, 'photoURL', 2048)
+        && (!('bloodType' in d) || d.bloodType == null
+            || d.bloodType in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'])
+        && optStr(d, 'allergies', 2000)
+        && d.updatedAt == request.time;
+    }
+
+    match /owners/{uid} {
+      allow read: if isUser(uid);
+      allow create: if isUser(uid)
+        && validOwner(uid, request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow update: if isUser(uid)
+        && validOwner(uid, request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if false;
+    }
+
+    // ---------- Catalogue (written only by the seed script / Admin SDK) ----------
+    match /specialties/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /doctors/{doctorId} {
+      allow read: if signedIn();
+      allow write: if false;
+
+      match /slots/{slotId} {
+        allow read: if signedIn();
+        allow create, delete: if false;
+
+        allow update: if signedIn()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['is_available', 'appointment_id', 'updated_at'])
+          && request.resource.data.updated_at == request.time
+          && (isSlotBooking(doctorId, slotId) || isSlotRelease());
+      }
+    }
+
+    // ---------- Appointments ----------
+    function validNewAppointment(aid, d) {
+      let slotPath = /databases/$(database)/documents/doctors/$(d.doctor_id)/slots/$(d.slot_id);
+      let doctorPath = /databases/$(database)/documents/doctors/$(d.doctor_id);
+      return d.keys().hasOnly(['patient_id', 'slot_id', 'doctor_id', 'doctor_name', 'specialty_name', 'clinic_name',
+                               'consultation_fee_minor', 'currency_code', 'doctor_color', 'starts_at', 'ends_at',
+                               'consultation_type', 'reason_for_visit', 'status', 'created_at', 'updated_at'])
+        && d.keys().hasAll(['patient_id', 'slot_id', 'doctor_id', 'doctor_name', 'specialty_name', 'clinic_name',
+                            'consultation_fee_minor', 'currency_code', 'doctor_color', 'starts_at', 'ends_at',
+                            'consultation_type', 'status', 'created_at', 'updated_at'])
+        && d.patient_id == request.auth.uid
+        && d.status == 'confirmed'
+        && d.consultation_type in ['in_person', 'video_call']
+        && (!('reason_for_visit' in d) || d.reason_for_visit == null || isStr(d.reason_for_visit, 1000))
+        && d.created_at == request.time
+        && d.updated_at == request.time
+        // The snapshot of the doctor must match the real catalogue entry, and the doctor must be bookable.
+        && exists(doctorPath)
+        && get(doctorPath).data.is_bookable == true
+        && d.doctor_name == get(doctorPath).data.full_name
+        && d.consultation_fee_minor == get(doctorPath).data.consultation_fee_minor
+        && d.currency_code == get(doctorPath).data.currency_code
+        // The slot must exist, be free, be in the future, and be reserved by this very commit.
+        && exists(slotPath)
+        && get(slotPath).data.is_available == true
+        && d.starts_at == get(slotPath).data.starts_at
+        && d.ends_at == get(slotPath).data.ends_at
+        && d.starts_at > request.time
+        && getAfter(slotPath).data.is_available == false
+        && getAfter(slotPath).data.appointment_id == aid;
+    }
+
+    match /appointments/{aid} {
+      allow read: if signedIn() && resource.data.patient_id == request.auth.uid;
+      allow create: if signedIn() && validNewAppointment(aid, request.resource.data);
+      // Patients can cancel a confirmed appointment and change nothing else.
+      allow update: if signedIn()
+        && resource.data.patient_id == request.auth.uid
+        && resource.data.status == 'confirmed'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updated_at'])
+        && request.resource.data.updated_at == request.time;
+      allow delete: if false;
+    }
+  }
+}

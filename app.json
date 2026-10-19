@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "247health",
+    "scheme": "health247",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"

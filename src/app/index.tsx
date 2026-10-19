@@ -4,26 +4,59 @@ import { useAuth } from '@/context/PageContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 
+const MIN_SPLASH_MS = 900;
+const MAX_WAIT_MS = 5000; // don't hang on the splash if the network is down
+const ONBOARDED_KEY = 'onboarded';
+
+/** Branded splash. Routes to home (signed in), sign-in (returning) or onboarding (first launch). */
 export default function Splash() {
-  const { isReady, profileReady, session, profile } = useAuth();
+  const { authReady, uid, profileReady } = useAuth();
+  const [minElapsed, setMinElapsed] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
+  const navigated = useRef(false);
 
   useEffect(() => {
-    if (!isReady || (session && !profileReady)) return;
-    let mounted = true;
-    const t = setTimeout(async () => {
-      let done = 'false';
-      try { done = (await AsyncStorage.getItem('onboarded')) ?? 'false'; } catch (e) { console.error(e); }
-      if (mounted) {
-        if (session && !profile?.patient_details_completed_at) router.replace('/patient-onboarding');
-        else if (session) router.replace('/(tabs)/home');
-        else router.replace(done === 'true' ? '/auth/logIn' : '/onboard');
-      }
-    }, 1200);
-    return () => { mounted = false; clearTimeout(t); };
-  }, [isReady, profileReady, session, profile?.patient_details_completed_at]);
+    const a = setTimeout(() => setMinElapsed(true), MIN_SPLASH_MS);
+    const b = setTimeout(() => setTimedOut(true), MAX_WAIT_MS);
+    return () => {
+      clearTimeout(a);
+      clearTimeout(b);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    AsyncStorage.getItem(ONBOARDED_KEY)
+      .then((value) => {
+        if (active) setOnboardingComplete(value === 'true');
+      })
+      .catch((error: unknown) => {
+        console.error('Unable to read onboarding status', error);
+        if (active) setOnboardingComplete(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (navigated.current || !authReady || !minElapsed) return;
+    if (onboardingComplete === null) return;
+    if (onboardingComplete && uid && !profileReady && !timedOut) return; // let the profile load so Home isn't empty
+
+    const target = !onboardingComplete
+      ? '/onboard'
+      : uid
+        ? '/(tabs)/home'
+        : '/auth/logIn';
+    navigated.current = true;
+    router.replace(target);
+  }, [authReady, uid, profileReady, minElapsed, timedOut, onboardingComplete]);
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', padding: Spacing.four }}>

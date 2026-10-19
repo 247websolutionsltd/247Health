@@ -1,4 +1,3 @@
-import Back from "@/components/back";
 import Button from "@/components/button";
 import Container from "@/components/custom-container";
 import Input from "@/components/custom-input";
@@ -16,7 +15,7 @@ const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"
 
 export default function PatientOnboarding() {
   const theme = useTheme();
-  const { user, profile, profileReady, profileLoading, error, reloadProfile } = useAuth();
+  const { user, profile, profileReady, profileLoading, error, reloadProfile, signOut } = useAuth();
 
   if (!user) {
     return (
@@ -52,6 +51,9 @@ export default function PatientOnboarding() {
             {error ?? "We could not load your patient profile."}
           </ThemedText>
           <Button title="Retry" onPress={() => void reloadProfile()} isLoading={profileLoading} />
+          <TouchableOpacity onPress={() => void signOut()} style={{ padding: Spacing.three }}>
+            <ThemedText type="smallBold" style={{ color: theme.textSecondary }}>Sign out</ThemedText>
+          </TouchableOpacity>
         </View>
       </Container>
     );
@@ -113,8 +115,7 @@ function PatientDetailsForm() {
   return (
     <Container edges={["top", "bottom"]}>
       <View style={{ padding: Spacing.three }}>
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: Spacing.four }}>
-          <Back />
+        <View style={{ marginBottom: Spacing.four }}>
           <ThemedText type="large">Patient details</ThemedText>
         </View>
 

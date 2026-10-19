@@ -9,15 +9,15 @@ import { ScrollView, View } from "react-native";
 const privacySections = [
   {
     title: "Information we collect",
-    text: "We collect the information needed to provide appointment booking, payment, and account support services, including profile details, contact information, order history, and device information used to protect your account.",
+    text: "We collect the information needed to provide appointment booking and account support services: your name, email, phone number, optional health details you choose to add (blood type, allergies), an optional profile photo, and your appointment history.",
   },
   {
     title: "How we use it",
-    text: "This data is used to create and manage appointments, process payments, improve service quality, provide customer support, and keep your account secure.",
+    text: "This data is used to create and manage your appointments, let clinics prepare for your visit, provide customer support, and keep your account secure.",
   },
   {
     title: "Your choices",
-    text: "You can update your profile, set communication preferences, and review saved locations or payment methods at any time from your account settings.",
+    text: "You can view and update your profile and health details, or change your password, at any time from your account settings.",
   },
   {
     title: "Security",
