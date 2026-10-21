@@ -37,7 +37,7 @@ $env:GOOGLE_APPLICATION_CREDENTIALS = "C:\path\service-account.json"
 node scripts/seed-firestore.mjs --project your-project-id        # add --dry-run to preview
 ```
 
-Re-run it any time to extend the booking window; slots already booked are never overwritten. **The doctors in `scripts/seed-data.mjs` are sample data. Replace them with real clinicians before launch.**
+Re-run it any time to extend the booking window; slots already booked are never overwritten. **The seed includes 15 sample doctor profiles across eight specialties; these are development/demo data. Replace them with real clinicians before launch.**
 
 ## 5. Optional: Google sign-in
 

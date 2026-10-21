@@ -3,33 +3,30 @@ import Button from "@/components/button";
 import OnboardingItem from "@/components/onboard";
 import Paginator from "@/components/paginator";
 import { ThemedText } from "@/components/themed-text";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { onboardingData } from "@/data/onboardData";
 import useHook from "@/hooks/general-hook";
 import { useTheme } from "@/hooks/use-theme";
 import { useStyles } from "@/styles/styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useCallback, useRef, useState } from "react";
-import { FlatList, StyleSheet, TouchableOpacity, View, type ViewToken } from "react-native";
+import { useRef, useState } from "react";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const VIEWABILITY_CONFIG = { viewAreaCoveragePercentThreshold: 50 };
 
 const OnboardingScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList<(typeof onboardingData)[number]> | null>(null);
-  const viewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+  const flatListRef = useRef<FlatList<any> | null>(null);
+  const viewableItemsChanged = useRef(({ viewableItems }: any) => {
     const nextIndex = viewableItems[0]?.index;
     if (typeof nextIndex === "number") {
       setCurrentIndex(nextIndex);
     }
-  }, []);
+  }).current;
   const { isLoading, setIsLoading } = useHook();
-  const [finishError, setFinishError] = useState<string | null>(null);
+  const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const scrollToNext = () => {
-    if (isLoading) return;
     if (currentIndex < onboardingData.length - 1) {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
@@ -44,15 +41,12 @@ const OnboardingScreen = () => {
     }
   };
   const finishOnboarding = async () => {
-    if (isLoading) return;
     setIsLoading(true);
-    setFinishError(null);
     try {
       await AsyncStorage.setItem('onboarded', 'true');
       router.replace("/auth/logIn");
-    } catch (error: unknown) {
-      console.error("[onboarding] Unable to finish onboarding", error);
-      setFinishError("We couldn't finish setting up the app. Please try again.");
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -77,15 +71,10 @@ const OnboardingScreen = () => {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onViewableItemsChanged={viewableItemsChanged}
-        viewabilityConfig={VIEWABILITY_CONFIG}
+        viewabilityConfig={viewConfig}
         ref={flatListRef}
       />
       <Paginator data={onboardingData} currentIndex={currentIndex} />
-      {finishError && (
-        <ThemedText type="small" style={{ color: Colors.danger, paddingHorizontal: Spacing.three }}>
-          {finishError}
-        </ThemedText>
-      )}
       <View style={onboardStyles.bottom}>
         {
           currentIndex > 0 &&
@@ -96,7 +85,6 @@ const OnboardingScreen = () => {
          onPress={scrollToNext} 
          isLoading={isLoading} 
          title={currentIndex === onboardingData.length - 1 ? "Get Started" : "Next"}
-         disabled={isLoading}
          style={{flex:1}}
          icon={currentIndex === onboardingData.length - 1 ? null : "arrow-forward"}
         />

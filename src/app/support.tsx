@@ -7,7 +7,8 @@ import { useStyles } from "@/styles/styles";
 import { MaterialIcons } from "@expo/vector-icons";
 import { support } from "@/lib/support";
 import { useState } from "react";
-import { Linking, TouchableOpacity, View } from "react-native";
+import { Linking } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 const faqs = [
     { question: "How do I reschedule an appointment?", answer: "Open the Visits tab, find your upcoming appointment and tap Reschedule. Pick a new time and your old slot is released once the new one is confirmed." },

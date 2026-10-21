@@ -4,12 +4,7 @@ import { appointmentService, type BookInput } from "@/services/appointment-servi
 import { catalogService } from "@/services/catalog-service";
 import { notificationService } from "@/services/notification-service";
 import type { Appointment, AppNotification, Doctor, Specialty } from "@/types/models";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-
-const EMPTY_SPECIALTIES: Specialty[] = [];
-const EMPTY_DOCTORS: Doctor[] = [];
-const EMPTY_APPOINTMENTS: Appointment[] = [];
-const EMPTY_NOTIFICATIONS: AppNotification[] = [];
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 /* ---------- Catalog (specialties + doctors) ---------- */
 
@@ -26,62 +21,38 @@ const CatalogContext = createContext<CatalogValue | undefined>(undefined);
 function CatalogProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const uid = user?.id ?? null;
-  const [catalog, setCatalog] = useState<{
-    uid: string;
-    specialties: Specialty[];
-    doctors: Doctor[];
-    error: string | null;
-  } | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const requestId = useRef(0);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async (targetUid: string) => {
-    const currentRequest = ++requestId.current;
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
       const [s, d] = await Promise.all([catalogService.listSpecialties(), catalogService.listDoctors()]);
-      if (currentRequest === requestId.current) setCatalog({ uid: targetUid, specialties: s, doctors: d, error: null });
+      setSpecialties(s);
+      setDoctors(d);
     } catch (caught) {
-      if (currentRequest === requestId.current) {
-        setCatalog((current) => ({
-          uid: targetUid,
-          specialties: current?.uid === targetUid ? current.specialties : EMPTY_SPECIALTIES,
-          doctors: current?.uid === targetUid ? current.doctors : EMPTY_DOCTORS,
-          error: friendlyError(caught, "Could not load doctors."),
-        }));
-      }
+      setError(friendlyError(caught, "Could not load doctors."));
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!uid) return;
-    void load(uid);
-  }, [uid, load]);
-
-  const reload = useCallback(async () => {
-    if (!uid) return;
-    setRefreshing(true);
-    try {
-      await load(uid);
-    } finally {
-      setRefreshing(false);
+    if (!uid) {
+      setSpecialties([]);
+      setDoctors([]);
+      setError(null);
+      return;
     }
+    void load();
   }, [uid, load]);
-  const visibleCatalog = catalog?.uid === uid ? catalog : null;
-  const specialties = uid ? visibleCatalog?.specialties ?? EMPTY_SPECIALTIES : EMPTY_SPECIALTIES;
-  const doctors = uid ? visibleCatalog?.doctors ?? EMPTY_DOCTORS : EMPTY_DOCTORS;
-  const loading = Boolean(uid && !visibleCatalog) || refreshing;
-  const error = visibleCatalog?.error ?? null;
 
   const value = useMemo<CatalogValue>(
-    () => ({
-      specialties,
-      doctors,
-      loading,
-      error,
-      reload,
-      getDoctor: (id) => (uid ? doctors.find((d) => d.id === id) : undefined),
-    }),
-    [uid, specialties, doctors, loading, error, reload],
+    () => ({ specialties, doctors, loading, error, reload: load, getDoctor: (id) => doctors.find((d) => d.id === id) }),
+    [specialties, doctors, loading, error, load],
   );
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;
 }
@@ -97,7 +68,7 @@ export function useCatalog() {
 export type DisplayStatus = "upcoming" | "completed" | "cancelled";
 
 /** A confirmed visit whose end time has passed counts as completed (there is no clinician-side app yet). */
-export function displayStatus(a: Appointment, now: number): DisplayStatus {
+export function displayStatus(a: Appointment, now = Date.now()): DisplayStatus {
   if (a.status === "cancelled") return "cancelled";
   if (a.status === "completed" || new Date(a.ends_at).getTime() <= now) return "completed";
   return "upcoming";
@@ -106,7 +77,6 @@ export function displayStatus(a: Appointment, now: number): DisplayStatus {
 type AppointmentsValue = {
   appointments: Appointment[];
   nextAppointment: Appointment | null;
-  now: number;
   loading: boolean;
   error: string | null;
   book: (input: BookInput) => Promise<Appointment>;
@@ -118,59 +88,55 @@ const AppointmentsContext = createContext<AppointmentsValue | undefined>(undefin
 function AppointmentsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const uid = user?.id ?? null;
-  const [snapshot, setSnapshot] = useState<{ uid: string; items: Appointment[] } | null>(null);
-  const [subscription, setSubscription] = useState<{ uid: string; loading: boolean; error: string | null } | null>(null);
-  const [now, setNow] = useState(0);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Re-evaluate "upcoming vs completed" as time passes.
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    if (!uid) return;
-    let active = true;
-    const unsubscribe = appointmentService.subscribeMine(
+    if (!uid) {
+      setAppointments([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    setLoading(true);
+    return appointmentService.subscribeMine(
       uid,
       (items) => {
-        if (!active) return;
-        setSnapshot({ uid, items });
-        setSubscription({ uid, loading: false, error: null });
+        setAppointments(items);
+        setError(null);
+        setLoading(false);
       },
       (caught) => {
-        if (!active) return;
-        setSubscription({ uid, loading: false, error: friendlyError(caught, "Could not load your appointments.") });
+        setError(friendlyError(caught, "Could not load your appointments."));
+        setLoading(false);
       },
     );
-    return () => {
-      active = false;
-      unsubscribe();
-    };
   }, [uid]);
 
   useEffect(() => {
-    const initial = setTimeout(() => setNow(Date.now()), 0);
-    const interval = setInterval(() => setNow(Date.now()), 60_000);
-    return () => {
-      clearTimeout(initial);
-      clearInterval(interval);
-    };
+    const id = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(id);
   }, []);
 
-  const appointments = snapshot?.uid === uid ? snapshot.items : EMPTY_APPOINTMENTS;
-  const loading = uid !== null && subscription?.uid !== uid ? true : (subscription?.loading ?? false);
-  const error = subscription?.uid === uid ? subscription.error : null;
-
   const value = useMemo<AppointmentsValue>(() => {
+    const now = Date.now();
     const upcoming = appointments
       .filter((a) => displayStatus(a, now) === "upcoming")
       .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
     return {
       appointments,
       nextAppointment: upcoming[0] ?? null,
-      now,
       loading,
       error,
       book: (input) => appointmentService.book(input),
       cancel: (a) => appointmentService.cancel(a),
       getAppointment: (id) => appointments.find((a) => a.id === id),
     };
-  }, [appointments, now, loading, error]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appointments, loading, error, tick]);
 
   return <AppointmentsContext.Provider value={value}>{children}</AppointmentsContext.Provider>;
 }
@@ -196,36 +162,31 @@ const NotificationsContext = createContext<NotificationsValue | undefined>(undef
 function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const uid = user?.id ?? null;
-  const [snapshot, setSnapshot] = useState<{ uid: string; items: AppNotification[] } | null>(null);
-  const [subscription, setSubscription] = useState<{ uid: string; loading: boolean; error: string | null } | null>(null);
-  const [actionError, setActionError] = useState<{ uid: string; message: string } | null>(null);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!uid) return;
-    let active = true;
-    const unsubscribe = notificationService.subscribeMine(
+    if (!uid) {
+      setNotifications([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    setLoading(true);
+    return notificationService.subscribeMine(
       uid,
       (items) => {
-        if (!active) return;
-        setSnapshot({ uid, items });
-        setSubscription({ uid, loading: false, error: null });
+        setNotifications(items);
+        setError(null);
+        setLoading(false);
       },
       (caught) => {
-        if (!active) return;
-        setSubscription({ uid, loading: false, error: friendlyError(caught, "Could not load notifications.") });
+        setError(friendlyError(caught, "Could not load notifications."));
+        setLoading(false);
       },
     );
-    return () => {
-      active = false;
-      unsubscribe();
-    };
   }, [uid]);
-
-  const notifications = snapshot?.uid === uid ? snapshot.items : EMPTY_NOTIFICATIONS;
-  const loading = uid !== null && subscription?.uid !== uid ? true : (subscription?.loading ?? false);
-  const error = subscription?.uid === uid
-    ? subscription.error ?? (actionError?.uid === uid ? actionError.message : null)
-    : null;
 
   const value = useMemo<NotificationsValue>(
     () => ({
@@ -234,21 +195,11 @@ function NotificationsProvider({ children }: { children: ReactNode }) {
       loading,
       error,
       markRead: async (id) => {
-        if (!uid) return;
-        setActionError(null);
-        try {
-          await notificationService.markRead(uid, id);
-        } catch (caught) {
-          setActionError({ uid, message: friendlyError(caught, "Could not mark this notification as read.") });
-        }
+        if (uid) await notificationService.markRead(uid, id).catch(() => undefined);
       },
       markAllRead: async () => {
-        if (!uid) return;
-        setActionError(null);
-        try {
-          await notificationService.markAllRead(uid, notifications.filter((n) => !n.read).map((n) => n.id));
-        } catch (caught) {
-          setActionError({ uid, message: friendlyError(caught, "Could not mark notifications as read.") });
+        if (uid) {
+          await notificationService.markAllRead(uid, notifications.filter((n) => !n.read).map((n) => n.id)).catch(() => undefined);
         }
       },
     }),

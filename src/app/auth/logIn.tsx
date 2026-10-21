@@ -1,13 +1,13 @@
 import AuthHeader from "@/components/auth-header";
+import GoogleSignInButton from "@/components/google-sign-in-button";
 import Button from "@/components/button";
 import Container from "@/components/custom-container";
 import Input from "@/components/custom-input";
-import GoogleSignInButton from "@/components/google-sign-in-button";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Radius, Shadow, Spacing } from "@/constants/theme";
 import { useAuth } from "@/context/PageContext";
-import { useTheme } from "@/hooks/use-theme";
 import { isGoogleSignInConfigured } from "@/lib/google-auth";
+import { useTheme } from "@/hooks/use-theme";
 import { useStyles } from "@/styles/styles";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -16,13 +16,15 @@ import { TouchableOpacity, View } from "react-native";
 export default function LogIn() {
   const styles = useStyles();
   const theme = useTheme();
-  const { logInForm, updateLogInField, handleLogin, loading, error: authError, clearError } = useAuth();
+  const { logInForm, updateLogInField, signIn, loading, error: authError, clearError } = useAuth();
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleSignIn = async () => {
     clearError();
     setFeedback(null);
-    await handleLogin();
+    const error = await signIn(logInForm.email, logInForm.password);
+    if (error) setFeedback(error);
+    else router.replace("/");
   };
 
   return (

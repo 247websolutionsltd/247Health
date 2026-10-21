@@ -14,18 +14,13 @@ import { catalogService } from "@/services/catalog-service";
 import type { ConsultationType, DoctorSlot } from "@/types/models";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 
 const TYPES: { value: ConsultationType; label: string; icon: "local-hospital" | "videocam" }[] = [
   { value: "in_person", label: "In-person", icon: "local-hospital" },
   { value: "video_call", label: "Video call", icon: "videocam" },
 ];
-const EMPTY_SLOTS: DoctorSlot[] = [];
-
-function Label({ children }: { children: ReactNode }) {
-  return <ThemedText type="bold" style={{ marginTop: Spacing.four, marginBottom: Spacing.two }}>{children}</ThemedText>;
-}
 
 export default function Book() {
   const theme = useTheme();
@@ -38,50 +33,29 @@ export default function Book() {
   const [chosenId, setChosenId] = useState<string | null>(doctorId ?? null);
   const doctor = getDoctor(chosenId ?? undefined) ?? (rescheduling ? undefined : bookable[0]);
 
-  const [slotState, setSlotState] = useState<{
-    doctorId: string;
-    slots: DoctorSlot[];
-    loading: boolean;
-    error: string | null;
-  }>({ doctorId: "", slots: [], loading: false, error: null });
-  const [selection, setSelection] = useState<{ doctorId: string; day: string | null; slotId: string | null }>({
-    doctorId: doctorId ?? "",
-    day: null,
-    slotId: null,
-  });
+  const [slots, setSlots] = useState<DoctorSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [slotId, setSlotId] = useState<string | null>(null);
   const [type, setType] = useState<ConsultationType>(rescheduling?.consultation_type ?? "in_person");
   const [reason, setReason] = useState(rescheduling?.reason_for_visit ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const doctorKey = doctor?.id;
-  const slots = slotState.doctorId === doctorKey ? slotState.slots : EMPTY_SLOTS;
-  const slotsLoading = Boolean(doctorKey) && (slotState.doctorId !== doctorKey || slotState.loading);
-  const slotsError = slotState.doctorId === doctorKey ? slotState.error : null;
-  const selectedDay = selection.doctorId === doctorKey ? selection.day : null;
-  const slotId = selection.doctorId === doctorKey ? selection.slotId : null;
-
   useEffect(() => {
+    setSlots([]);
+    setSelectedDay(null);
+    setSlotId(null);
+    setSlotsError(null);
     if (!doctorKey) return;
-    let active = true;
-    const unsubscribe = catalogService.subscribeOpenSlots(
+    setSlotsLoading(true);
+    return catalogService.subscribeOpenSlots(
       doctorKey,
-      (next) => {
-        if (active) setSlotState({ doctorId: doctorKey, slots: next, loading: false, error: null });
-      },
-      (caught) => {
-        if (active) setSlotState({
-          doctorId: doctorKey,
-          slots: [],
-          loading: false,
-          error: friendlyError(caught, "Could not load available times."),
-        });
-      },
+      (next) => { setSlots(next); setSlotsLoading(false); setSlotsError(null); },
+      (caught) => { setSlotsError(friendlyError(caught, "Could not load available times.")); setSlotsLoading(false); },
     );
-    return () => {
-      active = false;
-      unsubscribe();
-    };
   }, [doctorKey]);
 
   const days = useMemo(() => {
@@ -117,6 +91,10 @@ export default function Book() {
       setSubmitting(false);
     }
   };
+
+  const Label = ({ children }: { children: string }) => (
+    <ThemedText type="bold" style={{ marginTop: Spacing.four, marginBottom: Spacing.two }}>{children}</ThemedText>
+  );
 
   let body: React.ReactNode;
   if (catalogError && doctors.length === 0) body = <ErrorView message={catalogError} onRetry={() => void reload()} />;
@@ -167,7 +145,7 @@ export default function Book() {
                 return (
                   <TouchableOpacity
                     key={d.key}
-                    onPress={() => setSelection({ doctorId: doctorKey ?? "", day: d.key, slotId: null })}
+                    onPress={() => { setSelectedDay(d.key); setSlotId(null); }}
                     accessibilityRole="button"
                     accessibilityState={{ selected: on }}
                     style={[{ width: 64, paddingVertical: Spacing.three, alignItems: "center", borderRadius: Radius.md, marginRight: Spacing.two, backgroundColor: on ? Colors.primary : theme.background }, on ? {} : Shadow]}
@@ -187,7 +165,7 @@ export default function Book() {
                 return (
                   <TouchableOpacity
                     key={s.id}
-                    onPress={() => setSelection({ doctorId: doctorKey ?? "", day: selectedDay, slotId: s.id })}
+                    onPress={() => setSlotId(s.id)}
                     accessibilityRole="button"
                     accessibilityState={{ selected: on }}
                     style={{ width: "31%", paddingVertical: Spacing.two + 2, alignItems: "center", borderRadius: Radius.pill, backgroundColor: on ? Colors.primary : theme.background, borderWidth: 1, borderColor: on ? Colors.primary : theme.line }}

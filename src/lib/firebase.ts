@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
+import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { getAuth, initializeAuth, type Auth } from "firebase/auth";
 // Metro resolves "firebase/auth" to the React Native build at runtime, which exports this helper, but the
 // published type declarations omit it. See https://github.com/firebase/firebase-js-sdk/issues/7584
@@ -22,7 +22,7 @@ export const FIREBASE_SETUP_MESSAGE =
   "Firebase is not configured. Copy .env.example to .env, fill in your Firebase web app keys, then restart Expo with `npx expo start -c`.";
 
 export function isFirebaseConfigured() {
-  return Object.values(config).every((value) => Boolean(value));
+  return Boolean(config.apiKey && config.projectId && config.appId);
 }
 
 let app: FirebaseApp | null = null;
@@ -36,7 +36,7 @@ function requireConfigured() {
 
 export function getFirebaseApp(): FirebaseApp {
   requireConfigured();
-  if (!app) app = getApps().find((candidate) => candidate.name === "[DEFAULT]") ?? initializeApp(config);
+  if (!app) app = getApps().length ? getApp() : initializeApp(config);
   return app;
 }
 
@@ -49,9 +49,8 @@ export function getFirebaseAuth(): Auth {
     try {
       // Persist the session across app restarts.
       auth = initializeAuth(firebaseApp, { persistence: getReactNativePersistence(AsyncStorage) });
-    } catch (error) {
+    } catch {
       // Fast Refresh re-evaluates this module; Auth was already initialised.
-      if ((error as { code?: string } | null)?.code !== "auth/already-initialized") throw error;
       auth = getAuth(firebaseApp);
     }
   }
@@ -64,8 +63,7 @@ export function getDb(): Firestore {
   try {
     // Auto-detect avoids WebChannel connection failures that affect some React Native networks.
     db = initializeFirestore(firebaseApp, { experimentalAutoDetectLongPolling: true });
-  } catch (error) {
-    if ((error as { code?: string } | null)?.code !== "failed-precondition") throw error;
+  } catch {
     db = getFirestore(firebaseApp);
   }
   return db;

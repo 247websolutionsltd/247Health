@@ -15,7 +15,7 @@ import { View } from "react-native";
 export default function NotificationDetail() {
   const theme = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { notifications, loading, error, markRead } = useNotifications();
+  const { notifications, loading, markRead } = useNotifications();
   const n = notifications.find((item) => item.id === id);
   const needsMarking = Boolean(n && !n.read);
 
@@ -35,22 +35,19 @@ export default function NotificationDetail() {
         {!n ? (
           loading ? <LoadingView /> : <EmptyView icon="notifications-off" title="Notification not found" message="It may have been removed." />
         ) : (
-          <>
-            {error && <ThemedText type="small" style={{ color: Colors.danger, marginBottom: Spacing.two }}>{error}</ThemedText>}
-            <View style={{ backgroundColor: theme.background, borderRadius: Radius.md, borderWidth: 1, borderColor: theme.line, padding: Spacing.three }}>
-              <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: theme.accentSurface, alignItems: "center", justifyContent: "center" }}>
-                <MaterialIcons name={n.icon} size={26} color={Colors.primary} />
-              </View>
-              <ThemedText type="subtitle" style={{ marginTop: Spacing.three }}>{n.title}</ThemedText>
-              <ThemedText style={{ color: theme.textSecondary, marginTop: Spacing.one, lineHeight: 22 }}>{n.body}</ThemedText>
-              <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: Spacing.three }}>
-                {formatDay(n.created_at)} at {formatTime(n.created_at)}
-              </ThemedText>
-              {n.appointment_id && (
-                <Button title="View appointments" onPress={() => router.push("/(tabs)/appointments")} isLoading={false} style={{ marginTop: Spacing.three }} />
-              )}
+          <View style={{ backgroundColor: theme.background, borderRadius: Radius.md, borderWidth: 1, borderColor: theme.line, padding: Spacing.three }}>
+            <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: theme.accentSurface, alignItems: "center", justifyContent: "center" }}>
+              <MaterialIcons name={n.icon} size={26} color={Colors.primary} />
             </View>
-          </>
+            <ThemedText type="subtitle" style={{ marginTop: Spacing.three }}>{n.title}</ThemedText>
+            <ThemedText style={{ color: theme.textSecondary, marginTop: Spacing.one, lineHeight: 22 }}>{n.body}</ThemedText>
+            <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: Spacing.three }}>
+              {formatDay(n.created_at)} at {formatTime(n.created_at)}
+            </ThemedText>
+            {n.appointment_id && (
+              <Button title="View appointments" onPress={() => router.push("/(tabs)/appointments")} isLoading={false} style={{ marginTop: Spacing.three }} />
+            )}
+          </View>
         )}
       </View>
     </Container>

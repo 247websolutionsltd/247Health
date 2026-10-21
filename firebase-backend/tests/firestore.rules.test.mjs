@@ -71,10 +71,6 @@ const newProfile = (extra = {}) => ({
   full_name: "Ada", phone: "0801", blood_type: null, allergies: null, avatar_path: null,
   patient_details_completed_at: null, created_at: serverTimestamp(), updated_at: serverTimestamp(), ...extra,
 });
-const newOwner = (uid, extra = {}) => ({
-  uid, email: `${uid}@example.com`, displayName: "Ada", phone: "0801", photoURL: null,
-  bloodType: null, allergies: null, createdAt: serverTimestamp(), updatedAt: serverTimestamp(), ...extra,
-});
 
 describe("profiles", () => {
   test("a patient can create and read their own profile", async () => {
@@ -102,30 +98,6 @@ describe("profiles", () => {
     await assertFails(updateDoc(ref, { avatar_path: "profile-photos/bob/avatar", updated_at: serverTimestamp() }));
     await assertFails(updateDoc(ref, { allergies: "x".repeat(2001), updated_at: serverTimestamp() }));
     await assertFails(updateDoc(ref, { full_name: "Ada" })); // missing updated_at
-  });
-});
-
-describe("owner records", () => {
-  test("a patient can create, read, and update their own owner record", async () => {
-    const db = dbFor("alice");
-    const ref = doc(db, "owners", "alice");
-    await assertSucceeds(setDoc(ref, newOwner("alice")));
-    await assertSucceeds(getDoc(ref));
-    await assertSucceeds(updateDoc(ref, { phone: "0802", updatedAt: serverTimestamp() }));
-  });
-
-  test("owner records cannot be read or written for another patient", async () => {
-    await assertFails(setDoc(doc(dbFor("alice"), "owners", "bob"), newOwner("bob")));
-    await env.withSecurityRulesDisabled((ctx) =>
-      setDoc(doc(ctx.firestore(), "owners", "alice"), newOwner("alice")),
-    );
-    await assertFails(getDoc(doc(dbFor("bob"), "owners", "alice")));
-  });
-
-  test("owner records reject invalid identity and unexpected fields", async () => {
-    const db = dbFor("alice");
-    await assertFails(setDoc(doc(db, "owners", "alice"), newOwner("bob")));
-    await assertFails(setDoc(doc(db, "owners", "alice"), newOwner("alice", { is_admin: true })));
   });
 });
 

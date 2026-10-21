@@ -75,7 +75,7 @@ export default function DoctorProfile() {
           />
         </View>
         <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: Spacing.two }}>
-          Fees are paid at the clinic. You aren&apos;t charged in the app.
+          Fees are paid at the clinic. You aren't charged in the app.
         </ThemedText>
       </View>
     </Container>

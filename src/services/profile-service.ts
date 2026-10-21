@@ -3,7 +3,7 @@ import { AppError } from "@/lib/errors";
 import { toIso } from "@/lib/firestore-utils";
 import type { Profile } from "@/types/models";
 import { File } from "expo-file-system";
-import { doc, getDoc, serverTimestamp, Timestamp, updateDoc, writeBatch, type DocumentData } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc, Timestamp, updateDoc, writeBatch, type DocumentData } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Platform } from "react-native";
 

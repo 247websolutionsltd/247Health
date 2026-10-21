@@ -82,7 +82,7 @@ export default function Security() {
                   <ThemedText type="smallBold" style={{ color: Colors.primary }}>Resend email</ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={recheck} disabled={loading} accessibilityRole="button">
-                  <ThemedText type="smallBold" style={{ color: Colors.primary }}>I&apos;ve verified</ThemedText>
+                  <ThemedText type="smallBold" style={{ color: Colors.primary }}>I've verified</ThemedText>
                 </TouchableOpacity>
               </View>
               {verifyNote && <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: Spacing.two }}>{verifyNote}</ThemedText>}
@@ -106,7 +106,7 @@ export default function Security() {
         ) : (
           <View style={card}>
             <ThemedText type="small" style={{ color: theme.textSecondary, lineHeight: 20 }}>
-              You sign in with Google, so there&apos;s no password to manage here. Manage your Google account security from your Google settings.
+              You sign in with Google, so there's no password to manage here. Manage your Google account security from your Google settings.
             </ThemedText>
           </View>
         )}

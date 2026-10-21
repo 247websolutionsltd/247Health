@@ -23,17 +23,18 @@ const EMPTY: Record<DisplayStatus, string> = {
 
 export default function Appointments() {
   const theme = useTheme();
-  const { appointments, now, loading, error, cancel } = useAppointments();
+  const { appointments, loading, error, cancel } = useAppointments();
   const [tab, setTab] = useState<DisplayStatus>("upcoming");
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const list = useMemo(() => {
+    const now = Date.now();
     const filtered = appointments.filter((a) => displayStatus(a, now) === tab);
     // Soonest first for upcoming, most recent first for history.
     return filtered.sort((a, b) => (tab === "upcoming" ? a.starts_at.localeCompare(b.starts_at) : b.starts_at.localeCompare(a.starts_at)));
-  }, [appointments, now, tab]);
+  }, [appointments, tab]);
 
   const doCancel = async (a: Appointment) => {
     setBusyId(a.id);

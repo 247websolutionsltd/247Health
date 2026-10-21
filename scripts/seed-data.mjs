@@ -48,6 +48,16 @@ export const DOCTORS = [
     "General practitioner offering same-week appointments for check-ups, women's health and chronic disease care."),
   doc("dr-emeka-obi", "Dr. Emeka Obi", "dental", "Smile Studio Lekki", 4.6, 97, 6, 30, "#1D4ED8",
     "Dentist focused on routine check-ups, fillings, braces consultations and whitening."),
+  doc("dr-nneka-uba", "Dr. Nneka Uba", "cardiology", "Harbour Cardiac Clinic", 4.8, 154, 10, 42, "#7C3AED",
+    "Cardiologist providing heart-health assessments, blood pressure care and guidance on reducing cardiovascular risk."),
+  doc("dr-yusuf-abdullahi", "Dr. Yusuf Abdullahi", "pediatrics", "Sunrise Children's Clinic", 4.9, 221, 12, 35, "#DB2777",
+    "Paediatrician supporting children's health with routine check-ups, developmental care and common childhood illness treatment."),
+  doc("dr-adaeze-nwosu", "Dr. Adaeze Nwosu", "dental", "Oak Dental Care", 4.7, 136, 9, 28, "#059669",
+    "Dentist offering preventive care, fillings and family dental appointments in a welcoming clinic."),
+  doc("dr-kunle-fashola", "Dr. Kunle Fashola", "eye-care", "Vision Point Clinic", 4.8, 189, 13, 38, "#D97706",
+    "Ophthalmologist providing comprehensive eye exams, vision care and screening for common eye conditions."),
+  doc("dr-chioma-okoye", "Dr. Chioma Okoye", "neurology", "Summit Neurology Centre", 4.7, 112, 11, 48, "#0891B2",
+    "Neurologist caring for patients with headaches, nerve conditions and seizure disorders."),
 ];
 
 // Clinic hours in clinic-local time. 30-minute slots, Monday to Saturday, with a lunch break.

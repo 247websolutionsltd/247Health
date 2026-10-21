@@ -1,9 +1,8 @@
-import { AppError } from "@/lib/errors";
 import { getFirebaseAuth } from "@/lib/firebase";
+import { AppError } from "@/lib/errors";
 import {
   createUserWithEmailAndPassword,
   EmailAuthProvider,
-  signOut as firebaseSignOut,
   GoogleAuthProvider,
   onAuthStateChanged,
   reauthenticateWithCredential,
@@ -11,8 +10,9 @@ import {
   sendPasswordResetEmail,
   signInWithCredential,
   signInWithEmailAndPassword,
-  updateProfile as updateAuthProfile,
+  signOut as firebaseSignOut,
   updatePassword,
+  updateProfile as updateAuthProfile,
   type User,
 } from "firebase/auth";
 

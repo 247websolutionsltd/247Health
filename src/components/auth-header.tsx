@@ -1,4 +1,4 @@
-import { Colors, Spacing } from "@/constants/theme";
+import { Colors, Radius, Spacing } from "@/constants/theme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { View } from "react-native";
 import { ThemedText } from "./themed-text";

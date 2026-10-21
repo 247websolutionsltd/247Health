@@ -14,7 +14,7 @@ import { TouchableOpacity, View } from "react-native";
 export default function Register() {
   const styles = useStyles();
   const theme = useTheme();
-  const { registerForm, updateRegisterField, handleSignup, loading, error: authError, clearError } = useAuth();
+  const { registerForm, updateRegisterField, signUp, loading, error: authError, clearError } = useAuth();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackIsError, setFeedbackIsError] = useState(true);
 
@@ -36,7 +36,13 @@ export default function Register() {
       setFeedbackIsError(true);
       return;
     }
-    await handleSignup();
+    const error = await signUp(registerForm);
+    if (error) {
+      setFeedback(error);
+      setFeedbackIsError(true);
+    } else {
+      router.replace("/");
+    }
   };
 
   return (

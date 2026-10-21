@@ -52,12 +52,6 @@ export default function Notification() {
         </View>
       </View>
 
-      {error && notifications.length > 0 && (
-        <ThemedText type="small" style={{ color: Colors.danger, marginHorizontal: Spacing.three, marginBottom: Spacing.two }}>
-          {error}
-        </ThemedText>
-      )}
-
       {error && notifications.length === 0 ? (
         <ErrorView message={error} />
       ) : loading && notifications.length === 0 ? (

@@ -129,7 +129,9 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
       allow update: if isUser(uid)
         && validOwner(uid, request.resource.data)
-        && request.resource.data.createdAt == resource.data.createdAt;
+        && (request.resource.data.createdAt == resource.data.get('createdAt', null)
+          || (resource.data.get('createdAt', null) == null
+            && request.resource.data.createdAt == request.time));
       allow delete: if false;
     }
 

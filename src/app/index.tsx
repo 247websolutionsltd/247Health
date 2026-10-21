@@ -4,59 +4,29 @@ import { useAuth } from '@/context/PageContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
-const MIN_SPLASH_MS = 900;
-const MAX_WAIT_MS = 5000; // don't hang on the splash if the network is down
-const ONBOARDED_KEY = 'onboarded';
+// Show the full splash once per app launch; later visits (e.g. right after signing in) route straight through.
+let splashShown = false;
 
-/** Branded splash. Routes to home (signed in), sign-in (returning) or onboarding (first launch). */
 export default function Splash() {
-  const { authReady, uid, profileReady } = useAuth();
-  const [minElapsed, setMinElapsed] = useState(false);
-  const [timedOut, setTimedOut] = useState(false);
-  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
-  const navigated = useRef(false);
+  const { status } = useAuth();
 
   useEffect(() => {
-    const a = setTimeout(() => setMinElapsed(true), MIN_SPLASH_MS);
-    const b = setTimeout(() => setTimedOut(true), MAX_WAIT_MS);
-    return () => {
-      clearTimeout(a);
-      clearTimeout(b);
-    };
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    AsyncStorage.getItem(ONBOARDED_KEY)
-      .then((value) => {
-        if (active) setOnboardingComplete(value === 'true');
-      })
-      .catch((error: unknown) => {
-        console.error('Unable to read onboarding status', error);
-        if (active) setOnboardingComplete(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (navigated.current || !authReady || !minElapsed) return;
-    if (onboardingComplete === null) return;
-    if (onboardingComplete && uid && !profileReady && !timedOut) return; // let the profile load so Home isn't empty
-
-    const target = !onboardingComplete
-      ? '/onboard'
-      : uid
-        ? '/(tabs)/home'
-        : '/auth/logIn';
-    navigated.current = true;
-    router.replace(target);
-  }, [authReady, uid, profileReady, minElapsed, timedOut, onboardingComplete]);
+    if (status === 'loading') return;
+    let mounted = true;
+    const t = setTimeout(async () => {
+      let introSeen = 'false';
+      try { introSeen = (await AsyncStorage.getItem('onboarded')) ?? 'false'; } catch (e) { console.warn('Could not read intro state', e); }
+      if (!mounted) return;
+      splashShown = true;
+      if (status === 'needs-onboarding') router.replace('/patient-onboarding');
+      else if (status === 'ready') router.replace('/(tabs)/home');
+      else router.replace(introSeen === 'true' ? '/auth/logIn' : '/onboard');
+    }, splashShown ? 0 : 1000);
+    return () => { mounted = false; clearTimeout(t); };
+  }, [status]);
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', padding: Spacing.four }}>
